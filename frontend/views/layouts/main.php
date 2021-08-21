@@ -35,9 +35,10 @@ AppAsset::register($this);
         ],
     ]);
     $menuItems = [
-        ['label' => '首頁', 'url' => ['/site/index']],
+//        ['label' => '首頁', 'url' => ['/site/index']],
         ['label' => '交易版', 'url' => ['/trade-list/index']],
-        ['label' => '關於我', 'url' => ['/site/about']],
+        ['label' => '我的交易', 'url' => ['/trade-list/user-list']],
+        ['label' => '關於本站', 'url' => ['/site/about']],
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => '註冊', 'url' => ['/site/signup']];

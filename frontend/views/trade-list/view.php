@@ -14,22 +14,40 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="trade-list-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
     <div class="btn-group col-xs-12" style="margin-bottom: 20px">
         <?php
+
+        $btn = "";
+
         if ($model->seller == Yii::$app->user->getId()) {
-            echo Html::a('更新', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']);
-            echo Html::a('刪除', ['delete', 'id' => $model->id], [
+            if ($model->status == TradeList::STATUS_WAITING) {
+                $btn .= Html::a('更新', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']);
+            }
+
+            if ($model->status == TradeList::STATUS_CHARGE) {
+                $btn .= Html::a('結束交易', ['finished', 'id' => $model->id], ['class' => 'btn btn-success']);
+            }
+
+            $btn .= Html::a('刪除', ['delete', 'id' => $model->id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => '你確定要刪除本筆交易?',
                     'method' => 'post',
                 ],
             ]);
+
         } else {
-            Html::a('交易', ['charge', 'id' => $model->id], ['class' => 'btn btn-warring']);
+            if ($model->status == TradeList::STATUS_WAITING) {
+                $btn .= Html::a('交易', ['charge', 'id' => $model->id], [
+                    'class' => 'btn btn-warning',
+                    'data' => [
+                        'method' => 'post',
+                    ],
+                ]);
+            }
+
         }
+        echo $btn;
         ?>
     </div>
 
@@ -41,18 +59,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'seller',
                 'value' => function (TradeList $model) {
                     $user = Yii::$app->user;
-                    if ($model->buyer == null && $model->seller != $user->getId()) {
-                        return '*******(交易後顯示)';
+                    if ($model->seller == $user->getId() || $model->buyer == $user->getId()) {
+                        return $model->sellerModel->game_id;
                     }
-                    return $model->sellerModel->username;
+                    return '*******(交易後顯示)';
                 }
             ],
             [
                 'attribute' => 'buyer',
                 'value' => function (TradeList $model) {
                     $user = Yii::$app->user;
-                    if ($model->buyer == $user->getId() || $model->buyer == $user->getId()) {
-                        return $model->buyerModel->username;
+                    if ($model->seller == $user->getId() || $model->buyer == $user->getId()) {
+                        return $model->buyerModel->game_id;
                     }
                     return '';
                 }
@@ -84,4 +102,8 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]) ?>
 
+</div>
+
+<div>
+    <p class="p-4"></p>
 </div>

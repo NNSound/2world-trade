@@ -5,6 +5,7 @@ namespace frontend\models;
 use common\models\Item;
 use common\models\TradeList;
 use common\models\User;
+use ErrorException;
 
 /**
  * TradeList module definition class
@@ -41,9 +42,16 @@ class TradeListForm extends TradeList
     /**
      * @param bool $insert
      * @return bool
+     * @throws ErrorException
      */
     public function beforeSave($insert)
     {
+        $user = \Yii::$app->user;
+        $count = TradeList::find()->where(['seller' => $user->getId(), 'status' => TradeList::STATUS_WAITING])->count();
+
+        if ($count >= 20) {
+            throw new ErrorException('登錄的交易數量已達上限');
+        }
         if ($this->sell_item == $this->need_item) {
             $this->addError('need_item_type', '相同的交易物');
             return false;
@@ -51,11 +59,11 @@ class TradeListForm extends TradeList
 
         if ($insert) {
             $this->status = TradeList::STATUS_WAITING;
+            $this->create_at = date('Y-m-d H:i:s');
         }
-        $user = \Yii::$app->user;
         $this->seller = $user->getId();
         $this->server = $user->identity->server;
-        $this->create_at = date('Y-m-d H:i:s');
+        $this->update_at = date('Y-m-d H:i:s');
 
         $sellItem = Item::findOne($this->sell_item);
         $needItem = Item::findOne($this->need_item);

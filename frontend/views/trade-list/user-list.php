@@ -8,19 +8,14 @@ use yii\grid\GridView;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $searchModel  frontend\models\TradeListSearch */
 
-$this->title = '交易版';
+$this->title = '我的交易';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="trade-list-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('建立交易', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
+    <?= $this->render('_search-user', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

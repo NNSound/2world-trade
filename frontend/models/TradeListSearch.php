@@ -46,6 +46,7 @@ class TradeListSearch extends TradeList
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['status' => SORT_ASC]],
         ]);
 
         $this->load($params);

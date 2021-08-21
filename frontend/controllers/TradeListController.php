@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\TradeList;
+use ErrorException;
 use frontend\models\TradeListForm;
 use frontend\models\TradeListSearch;
 use yii\data\ActiveDataProvider;
@@ -50,6 +51,24 @@ class TradeListController extends Controller
     }
 
     /**
+     * @return string
+     */
+    public function actionUserList()
+    {
+        $searchModel = new TradeListSearch();
+
+        $user = \Yii::$app->user;
+        $dataProvider = $searchModel->search($this->request->queryParams);
+        $dataProvider->query->andWhere(['seller' => $user->getId()]);
+        $dataProvider->query->orWhere(['buyer' => $user->getId()]);
+
+        return $this->render('user-list', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
      * Displays a single TradeList model.
      * @param int $id ID
      * @return mixed
@@ -80,9 +99,13 @@ class TradeListController extends Controller
         }
 
         if ($this->request->isPost) {
+            try {
 
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+                if ($model->load($this->request->post()) && $model->save()) {
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+            } catch (ErrorException $e) {
+                \Yii::$app->session->setFlash('error', $e->getMessage());
             }
         } else {
             $model->loadDefaultValues();
@@ -128,20 +151,60 @@ class TradeListController extends Controller
     {
         $user = \Yii::$app->user;
 
-        /** @var TradeListForm $model */
-        $model = TradeListForm::find()->where(['id' => $id, 'status' => TradeList::STATUS_WAITING])->one();
-        if ($model === null) {
-            throw new NotFoundHttpException('找不到訂單.');
-        }
-        if ($model->seller == $user->getId()) {
-            throw new NotFoundHttpException('不可以跟自己交易.');
-        }
-        $model->buyer = $user->getId();
-        $model->status = TradeList::STATUS_CHARGE;
-        $model->update_at = date('Y-m-d H:i:s');
+        /** @var TradeList $model */
+        $model = TradeList::find()->where(['id' => $id, 'status' => TradeList::STATUS_WAITING])->one();
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        try {
+            if ($model === null) {
+                throw new ErrorException('找不到訂單.');
+            }
+            if ($model->seller == $user->getId()) {
+                throw new ErrorException('不可以跟自己交易.');
+            }
+            $model->buyer = $user->getId();
+            $model->status = TradeList::STATUS_CHARGE;
+            $model->update_at = date('Y-m-d H:i:s');
+
+            if ($this->request->isPost && $model->validate()) {
+                $model->save();
+                \Yii::$app->session->setFlash('success', '交易中, 請聯絡賣家');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        } catch (ErrorException $e) {
+            \Yii::$app->session->setFlash('error', $e->getMessage());
+        }
+
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     */
+    public function actionFinished($id)
+    {
+        $user = \Yii::$app->user;
+        /** @var TradeListForm $model */
+        $model = TradeListForm::find()->where([
+            'id' => $id,
+            'seller' => $user->getId(),
+            'status' => TradeList::STATUS_CHARGE,
+        ])->one();
+
+        try {
+            if ($model == null) {
+                throw new ErrorException('交易不存在或非進行中');
+            }
+            $model->status = TradeList::STATUS_FINISHED;
+
+            if ($model->save()) {
+                throw new ErrorException('交易狀態變更失敗');
+            }
+            \Yii::$app->session->setFlash('success', '交易結束');
+
+        } catch (ErrorException $e) {
+            \Yii::$app->session->setFlash('error', $e->getMessage());
+
         }
 
         return $this->redirect(['index']);
@@ -178,6 +241,6 @@ class TradeListController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('該頁不存在');
     }
 }

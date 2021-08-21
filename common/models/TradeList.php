@@ -81,7 +81,7 @@ class TradeList extends \yii\db\ActiveRecord
     /**
      * @return string[]
      */
-    public function getStatusLabel() {
+    public static function getStatusLabel() {
         return [
             self::STATUS_WAITING => '可交易',
             self::STATUS_CHARGE => '等待交易',
