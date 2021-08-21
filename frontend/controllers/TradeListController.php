@@ -55,9 +55,13 @@ class TradeListController extends Controller
      */
     public function actionUserList()
     {
+        $user = \Yii::$app->user;
+
+        if ($user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
         $searchModel = new TradeListSearch();
 
-        $user = \Yii::$app->user;
         $dataProvider = $searchModel->search($this->request->queryParams);
         $dataProvider->query->andWhere(['seller' => $user->getId()]);
         $dataProvider->query->orWhere(['buyer' => $user->getId()]);
