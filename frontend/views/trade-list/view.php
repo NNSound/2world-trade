@@ -60,7 +60,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (TradeList $model) {
                     $user = Yii::$app->user;
                     if ($model->seller == $user->getId() || $model->buyer == $user->getId()) {
-                        return $model->sellerModel->game_id;
+                        $sellerModel = $model->sellerModel;
+                        return $sellerModel != null ? $sellerModel->game_id : '';
                     }
                     return '*******(交易後顯示)';
                 }
@@ -70,7 +71,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (TradeList $model) {
                     $user = Yii::$app->user;
                     if ($model->seller == $user->getId() || $model->buyer == $user->getId()) {
-                        return $model->buyerModel->game_id;
+                        $buyerModel = $model->buyerModel;
+                        return $buyerModel!= null ? $buyerModel->game_id : '';
                     }
                     return '';
                 }
