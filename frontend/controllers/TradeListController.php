@@ -201,14 +201,13 @@ class TradeListController extends Controller
             }
             $model->status = TradeList::STATUS_FINISHED;
 
-            if ($model->save()) {
+            if (!$model->save()) {
                 throw new ErrorException('交易狀態變更失敗');
             }
-            \Yii::$app->session->setFlash('success', '交易結束');
+            \Yii::$app->session->setFlash('success', '成功, 交易結束');
 
         } catch (ErrorException $e) {
             \Yii::$app->session->setFlash('error', $e->getMessage());
-
         }
 
         return $this->redirect(['index']);
