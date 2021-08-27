@@ -47,6 +47,7 @@ class User extends ActiveRecord implements IdentityInterface
     const SERVER_14 = 14;
     const SERVER_15 = 15;
     const SERVER_16 = 16;
+    const SERVER_17 = 17;
 
     /**
      * {@inheritdoc}
@@ -99,6 +100,7 @@ class User extends ActiveRecord implements IdentityInterface
             self::SERVER_14 => '獵戶座',
             self::SERVER_15 => '天兔座',
             self::SERVER_16 => '射手座',
+            self::SERVER_17 => '羅盤座',
         ];
     }
 
