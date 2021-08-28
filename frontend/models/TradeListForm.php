@@ -53,8 +53,7 @@ class TradeListForm extends TradeList
             throw new ErrorException('登錄的交易數量已達上限');
         }
         if ($this->sell_item == $this->need_item) {
-            $this->addError('need_item_type', '相同的交易物');
-            return false;
+            throw new ErrorException('相同的交易物');
         }
 
         if ($insert) {
@@ -73,13 +72,11 @@ class TradeListForm extends TradeList
         //書頁
         if ($this->sell_item_type <= 3 && $this->need_item_type <= 3) {
             if (abs($this->sell_item_type - $this->need_item_type) >= 2) {
-                $this->addError('need_item_type', '書頁交易類型錯誤');
-                return false;
+                throw new ErrorException('書頁交易類型錯誤');
             }
         } else {
             if ($this->sell_item_type != $this->need_item_type) {
-                $this->addError('need_item_type', '交易類型錯誤');
-                return false;
+                throw new ErrorException('交易類型錯誤');
             }
         }
 

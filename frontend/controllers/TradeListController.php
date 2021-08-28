@@ -165,6 +165,10 @@ class TradeListController extends Controller
             if ($model->seller == $user->getId()) {
                 throw new ErrorException('不可以跟自己交易.');
             }
+            if ($model->server != $user->identity->server) {
+                throw new \yii\base\ErrorException('不可以跟不同伺服器的人交易.');
+            }
+
             $model->buyer = $user->getId();
             $model->status = TradeList::STATUS_CHARGE;
             $model->update_at = date('Y-m-d H:i:s');
